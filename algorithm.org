@@ -1,3 +1,4 @@
 * 数据结构与算法
 ** 数据结构
 ** 常见算法
+   [[file:src/leetcode.org][leetcode]]
