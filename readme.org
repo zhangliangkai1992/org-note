@@ -1,0 +1,12 @@
+* 我的个人笔记
+** 算法
+   [[file:algorithm.org][算法]]
+** 计算机网络
+   [[file:network.org][计算机网络]]
+** 存储
+   [[file:storage.org][计算机存储]]
+** Linux
+   [[file:linux-note.org][Linux]]
+** 编程语言
+   [[file:language-note.org][编程语言]]
+** 其他
