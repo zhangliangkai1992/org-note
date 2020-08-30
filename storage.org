@@ -1,2 +1,86 @@
 * MySQL
+** 基本SQL
+*** 登录
+    #+BEGIN_SRC sh
+      mysql -h myhost -u username -p
+    #+END_SRC
+*** 选择数据库
+    #+BEGIN_SRC sql
+      USE databasename;
+    #+END_SRC
+*** 建表
+    #+BEGIN_SRC sql
+      CREATE TABLE user_account
+      (
+      id INT NOT NULL AUTO_INCREMENT COMMENT '自增id',
+      balance INT NOT NULL DEFAULT 0 COMMENT '余额',
+      PRIMARY KEY (id)
+      )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    #+END_SRC
+*** 插入
+    #+BEGIN_SRC sql
+      INSERT INTO user_account (balance) VALUES (30);
+    #+END_SRC
+*** 查询
+    #+BEGIN_SRC sql
+      SELECT id,balance FROM user_account;
+    #+END_SRC
+*** 更新
+    #+BEGIN_SRC sql
+      UPDATE user_account SET balance=balance+10 WHERE id=1;
+    #+END_SRC
+** 事务
+   事务是一个操作序列，这些操作要么都做，要么都不做，是一个不可分割的原子单位。
+   事务同常以BEGIN开始，以COMMIT结束
+   #+BEGIN_SRC sql
+     BEGIN;
+     UPDATE user_account SET balance=balance-100 WHERE id=1;
+     UPDATE user_account SET balance=balance+100 WHERE id=2;
+     COMMIT;
+   #+END_SRC
+** 事务的4个特性
+   ACID(原子性/一致性/隔离性/持久性)
+*** 扁平事务
+    所有的操作都在同一层次，较为常见
+*** 分布式事务XA
+    XA协议主要定义了事务管理器TM和资源管理器RM
+    RM往往由数据库实现
+    TM作为全局的调度者，负责各个本地的资源提交和回滚
+    两段提交2PC：一阶段请求（只有都同意才能进入二阶段），二阶段执行
+    缺点：性能不佳，无法满足高并发
+*** 隔离级别
+    在多线程的情况下会发生以下的情况
+      - 脏读：一个事务读取了已经被另外一个修改但未提交的数据
+      - 不可重复读：同一个事务查询某行时这行数据已经发生修改（update或者delete）
+      - 幻读：同一事务中查询多次返回不同的结果集（insert操作）
+    4中隔离级别
+      - 读未提交：事务中的修改即使没有提交也能被其他事务可见
+      - 读已提交：一个事务只能看到已经提交的事务所做的改变
+      - 可重复读：同一个事务中多次读取相同的数据时结果是一样的（MVCC机制，MySQL的默认隔离级别）
+      - 可串行化：强制事务排序
+** CAP定理
+   CAP定理：在分布式系统中CAP最多只能CP或者AP
+   CAP（一致性/可用性/分区容错性）
+   常见的措施：AP以及最终一致性
+** 常见的存储引擎
+*** MyISAM
+    - 不支持事务，不支持外键约束
+    - 表级锁
+    - 读写相互阻塞
+    - 不缓存数据，只缓存索引，支持全文索引
+    - 读取速度较快，占用资源少
+*** InnoDB
+    - 支持事务，支持外键
+    - 行级锁
+    - 支持崩溃修复和MVCC（多版本并发控制）
+    - 缓存数据和索引
+*** 索引
+    索引包含以下几种：
+     - B+树索引
+     - HASH索引
+     - 全文索引
+    覆盖索引：一个索引包含了所有满足查询所需要的数据，不需要回表（查询条件->主键，主键->数据行）操作。
+    InnoDB的自适应哈希索引：当某些索引值被频繁使用时自动创建
+    前缀索引
+    全文索引
 * Redis
