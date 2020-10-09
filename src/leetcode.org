@@ -1,1 +1,177 @@
-** 题1
+** Q:题315 逆序对个数
+   [[https://leetcode.com/problems/count-of-smaller-numbers-after-self/][Count of Small Numbers After Self]]
+  A:解法
+  1. 暴力法，直接枚举，时间复杂度O(n^2)
+  2. 分治法：类似于归并排序
+     #+BEGIN_SRC cpp
+       #include <iostream>
+       #include <utility>
+       #include <vector>
+
+       using namespace std;
+
+       vector<pair<int,int>> mergeSort(const vector<pair<int,int>>& numPairs, vector<int>& smallerCount)
+       {
+         int len = numPairs.size();
+         if(len <= 1) {
+           return numPairs;
+         }
+         auto mid = numPairs.begin() + len / 2;
+         auto left = mergeSort(vector<pair<int,int>>(numPairs.begin(), mid), smallerCount);
+         auto right = mergeSort(vector<pair<int,int>>(mid, numPairs.end()), smallerCount);
+         int leftSz = left.size();
+         if(leftSz == 0) {
+           return right;
+         }
+         int rightSz = right.size();
+         if(rightSz == 0) {
+           return left;
+         }
+         vector<pair<int, int>> res;
+         //i是left的索引，j是right的索引,同时j也是右边已经加入合并的元素个数
+         int i = 0, j = 0;
+         while(i < leftSz || j < rightSz) {
+           if(j == rightSz || (i < leftSz && left[i].first <= right[j].first)) {
+             //left[i].first代表值，left[i].second代表在原来的索引
+             //如果left[i].first <= right[j].first表示，那么left[i].second加上right已经合并的个数，即j
+             smallerCount[left[i].second] += j;
+             res.push_back(left[i++]);
+           }
+           else {
+             res.push_back(right[j++]);
+           }
+         }
+         return res;
+       }
+
+       vector<int> countSmaller(vector<int>& nums)
+       {
+         /*
+           归并排序，在合并两个分支时可以得到增加的逆序对数
+         ,*/
+         int len = nums.size();
+         //每个元素是其值和索引，即(value, index)
+         vector<pair<int,int>> numPairs;
+         for(int i = 0; i < len; ++i) {
+           numPairs.push_back(make_pair(nums[i], i));
+         }
+         vector<int> smallerCount(len, 0);
+         mergeSort(numPairs, smallerCount);
+         return smallerCount;
+       }
+
+
+       int main(int argc, char *argv[])
+       {
+         vector<int> nums = {1,5,2,6};
+         auto res = countSmaller(nums);
+         return 0;
+       }
+     #+END_SRC
+  3. 数状数组(Fenwick tree)
+     二进制的一些特性
+     #+BEGIN_SRC cpp
+       /*
+        表示整数n的二进制位中1最后一个1所代表的数值LowBit
+        如12=(b1100)，为1的最低为b100，即4
+        LowBit(12) = n & (-n) = 4
+        ,*/
+       int lowBit(int n)
+       {
+         return n & (-n)
+       }
+       /*
+         去掉为1的最后一位
+         removeLastBit
+        */
+       int removeLastBit(int n)
+       {
+         return n & (n - 1);
+       }
+       /*
+         求n中二进制1的个数
+        */
+       int countOne(int n)
+       {
+         int count = 0;
+         while(n) {
+           n = countOne(n);
+           ++count;
+         }
+         return count;
+       }
+     #+END_SRC
+     树状数组（求前缀和且单点更新）
+     #+BEGIN_SRC cpp
+       class BITree
+       {
+       private:
+         vector<int> bit;
+         int lowbit(int n) {
+           return n & (-n);
+         }
+       public:
+         BITree(int len): bit(len+1) {};
+         int querySum(int pos) {
+           int sum = 0;
+           for(int i = pos; i > 0; i -= lowbit(i)) {
+             sum += bit[i];
+           }
+           return sum;
+         }
+         void update(int pos, int delta) {
+           for(int i = pos; i < bit.size(); i += lowbit(i)) {
+             bit[i] += delta;
+           }
+         }
+       };
+
+     #+END_SRC
+** Q:题85 最大矩形面积
+   [[https://leetcode.com/problems/maximal-rectangle/][Maximal Rectangle]]
+   分析：
+   - Area = (right - left) * height
+   - 从上到下依次找到(i,j)的最大矩形，即right,left,height
+   - 当matrix[i][j] == 0时，height=0
+   #+BEGIN_SRC cpp
+     int maximalRectangle(vector<vector<int>>& matrix)
+     {
+       int rows = matrix.size();
+       if(rows == 0) {
+         return 0;
+       }
+       int cols = matrix[0].size();
+       vector<int> left(cols, 0);
+       vector<int> right(cols, cols);
+       vector<int> height(cols, 0);
+       int maxArea = 0;
+
+       //遍历每行
+       for(int i = 0; i < rows; ++i) {
+         int curLeft = 0, curRight = cols;
+         for(int j = 0; j < cols; ++j) {
+           if(matrix[i][j] == '1') {
+             ++height[j];
+             left[j] = max(left[j],curLeft);
+           }
+           else {
+             height[j] = 0;
+             left[j] = 0;
+             curLeft = j + 1;
+           }
+         }
+         for(int j = col-1; j >= 0; --j) {
+           if(matrix[i][j] == '1') {
+             right[j] = min(right[j], curRight);
+           }
+           else {
+             right[j] = cols;
+             colRight = j;
+           }
+
+           maxArea = max(maxArea, (right[j]-left[j])*height[j]);
+         }
+       }
+       return maxArea;
+     }
+   #+END_SRC

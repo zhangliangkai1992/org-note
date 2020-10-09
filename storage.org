@@ -93,4 +93,8 @@
     前缀索引
 
     全文索引
+*** 主从复制
+    1. master记录所有改变了数据库数据的语句，放到binlog中
+    2. slave从master上拉取binlog，放到自己的relay log中
+    3. slave执行relay log语句
 * Redis

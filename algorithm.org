@@ -1,4 +1,197 @@
 * 数据结构与算法
 ** 数据结构
 ** 常见算法
+*** 排序
+**** TODO 快速排序
+       #+BEGIN_SRC cpp
+         #include <iostream>
+         #include <algorithm>
+         #include <vector>
+         using namespace std;
+         int partition(vector<int>& nums, int low, int high)
+         {
+           int pivot = nums[low];
+           int i = low;
+           int j = high;
+           while(i < j) {
+             while(nums[j] >= pivot && i < j)--j;
+             while(nums[i] <= pivot && i < j)++i;
+             swap(nums[i], nums[j]);
+           }
+           swap(nums[i], nums[low]);
+           return i;
+         }
+         void myFastSort(vector<int>& nums, int low, int high)
+         {
+           if(low >= high)return;
+           int index = partition(nums, low, high);
+           myFastSort(nums, low, index-1);
+           myFastSort(nums, index+1, high);
+         }
+         void print(vector<int>& nums)
+         {
+           for(auto&& n: nums) {
+             cout << n << "\t";
+           }
+           cout << endl;
+         }
+         int main(int argc, char *argv[])
+         {
+           const int MAX = 5000;
+           vector<int> nums;
+           srand(time(0));
+           for(int i = 0; i < MAX; ++i) {
+             nums.push_back(random() % MAX);
+           }
+           auto another = nums;
+           sort(nums.begin(), nums.end());
+           myFastSort(another, 0, MAX-1);
+           for(int i = 0; i < MAX; ++i) {
+             if(nums[i] != another[i]) {
+               cout << "WRONG\n";
+               break;
+             }
+           }
+           //print(nums);
+           //print(another);
+           cout << "FINISHED\n";
+           return 0;
+         }
+
+       #+END_SRC
+
+       #+RESULTS:
+       : FINISHED
+
+**** DONE 堆排序
+     CLOSED: [2020-09-19 Sat 16:49]
+     #+BEGIN_SRC cpp
+       #include <iostream>
+       #include <vector>
+       #include <algorithm>
+       #include <cstdlib>
+
+       using namespace std;
+
+       void heapify(vector<int>& nums, int start, int end)
+       {
+         int child = start * 2 + 1;
+         while(child <= end) {
+           if(child+1 <= end && nums[child] < nums[child+1]) {
+             ++child;
+           }
+           if(nums[start] > nums[child])return;
+           auto tmp = nums[start];
+           nums[start] = nums[child];
+           nums[child] = tmp;
+           start = child;
+           child = start * 2 + 1;
+         }
+       }
+
+       void buildHeap(vector<int>& nums)
+       {
+         int len = nums.size();
+         for(int i = len / 2 - 1; i >= 0; --i) {
+           heapify(nums, i, len-1);
+         }
+       }
+
+       void myHeapSort(vector<int>& nums)
+       {
+         int len = nums.size();
+         buildHeap(nums);
+         for(int i = len - 1; i >= 0; --i) {
+           auto tmp = nums[i];
+           nums[i] = nums[0];
+           nums[0] = tmp;
+           heapify(nums, 0, i-1);
+         }
+       }
+
+       int main(int argc, char *argv[])
+       {
+         const int MAX = 500;
+         vector<int> nums;
+         srand(time(0));
+         for(int i = 0; i < MAX; ++i) {
+           nums.push_back(random() % MAX);
+         }
+         auto another = nums;
+         sort(nums.begin(), nums.end());
+         myHeapSort(another);
+         for(int i = 0; i < MAX; ++i) {
+           if(nums[i] != another[i]) {
+             cout << "WRONG\n";
+             break;
+           }
+         }
+         cout << "FINISHED\n";
+         return 0;
+       }
+
+     #+END_SRC
+
+     #+RESULTS:
+     : FINISHED
+
+
+**** TODO 归并排序
+     #+BEGIN_SRC cpp
+       #include <iostream>
+       #include <vector>
+       #include <algorithm>
+       using namespace std;
+       void myMergeSort(vector<int>& nums)
+       {
+         int len = nums.size();
+         if(len <= 1)return;
+         auto mid = nums.begin() + len / 2;
+         vector<int> left(nums.begin(), mid);
+         vector<int> right(mid, nums.end());
+         myMergeSort(left);
+         myMergeSort(right);
+         int l = 0;
+         int r = 0;
+         int leftSz = len / 2;
+         int rightSz = len - leftSz;
+         int cur = 0;
+         while(l < leftSz || r < rightSz) {
+           if(r == rightSz || l < leftSz && left[l] <= right[r]) {
+             nums[cur++] = left[l++];
+           }
+           else {
+             nums[cur++] = right[r++];
+           }
+         }
+       }
+       int main(int argc, char *argv[])
+       {
+         const int MAX = 100000;
+         vector<int> nums;
+         srand(time(0));
+         for(int i = 0; i < MAX; ++i) {
+           nums.push_back(random() % MAX);
+         }
+         auto another = nums;
+         sort(nums.begin(), nums.end());
+         myMergeSort(another);
+         for(int i = 0; i < MAX; ++i) {
+           if(nums[i] != another[i]) {
+             cout << "WRONG\n";
+             break;
+           }
+         }
+         cout << "FINISHED\n";
+         return 0;
+       }
+
+     #+END_SRC
+
+     #+RESULTS:
+     : FINISHED
+
+**** TODO BST构建和遍历
+     [[file:src/bst.cc][二叉搜素树构建与遍历]]
+** 其他
    [[file:src/leetcode.org][leetcode]]
